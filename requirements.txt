@@ -1,0 +1,3 @@
+Flask
+numpy
+# tensorflow  # Añade esta línea si usas TensorFlow
