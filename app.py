@@ -23,7 +23,6 @@ def predict():
 
     # Preprocesamiento de datos
     input_data = [area, rooms, bathrooms]  # Modifica según tu modelo
-
     # Realizar la predicción
     # prediction = modelo.predict(input_data)  # Descomentar para usar el modelo real
     prediction = dummy_predict(input_data)  # Simulación para este ejemplo
