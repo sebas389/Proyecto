@@ -1,5 +1,4 @@
-from flask import Flask, request, jsonify
-import numpy as np
+from flask import Flask, request, jsonify, render_template
 
 app = Flask(__name__)
 
@@ -8,8 +7,9 @@ app = Flask(__name__)
 def dummy_predict(data):
     return [sum(data) * 1000]
 
-# Cargar tu modelo de IA aquí
-# modelo = tf.keras.models.load_model('ruta/a/tu/modelo.h5')
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -22,7 +22,7 @@ def predict():
     bathrooms = data['bathrooms']
 
     # Preprocesamiento de datos
-    input_data = np.array([area, rooms, bathrooms])  # Modifica según tu modelo
+    input_data = [area, rooms, bathrooms]  # Modifica según tu modelo
 
     # Realizar la predicción
     # prediction = modelo.predict(input_data)  # Descomentar para usar el modelo real
