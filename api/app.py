@@ -1,26 +1,31 @@
 from flask import Flask, request, jsonify, render_template
 import numpy as np
+import pandas as pd
 from joblib import load
 from sklearn.preprocessing import StandardScaler
 
 app = Flask(__name__)
 
-# Cargar el modelo y el escalador
-model = load('api/random_forest_model.joblib')
-scaler = StandardScaler()  # Asumimos que tu escalador está entrenado y guardado en el modelo
+# Cargar el modelo y el scaler
+model = load('random_forest_model.joblib')
+scaler = StandardScaler()
 
 def preprocess_input(data):
     df = pd.DataFrame(data, index=[0])
-    # Transformaciones necesarias
-    df["Bathrooms"] = np.log(df["Bathrooms"] + 1)
-    df["Bedrooms"] = np.log(df["Bedrooms"]+ 1)
-    df["Area"] = np.log(df["Area"] + 1)
-    df["Floor"] = np.log(df["Floor"] + 1)
-    # Variables dummy para District
+
+    # Aplica las mismas transformaciones que usaste en tu modelo
+    df["Bathrooms"] = np.log(df["bathrooms"] + 1)  # Ajuste en el nombre de la clave
+    df["Bedrooms"] = np.log(df["rooms"] + 1)  # Ajuste en el nombre de la clave
+    df["Area"] = np.log(df["area"] + 1)  # Ajuste en el nombre de la clave
+    df["Floor"] = np.log(df["floor"] + 1)  # Si se usa, ajuste en el nombre de la clave
+
+    # Dummy variables para District
     districts = ['list_of_districts_used_in_training']
     for district in districts:
-        df[district] = 1 if df['District'] == district else 0
-    df.drop("District", axis=1, inplace=True)
+        df[district] = 1 if df['district'] == district else 0  # Ajuste en el nombre de la clave
+
+    df.drop("district", axis=1, inplace=True)  # Ajuste en el nombre de la clave
+
     # Escalar los datos
     df_scaled = scaler.transform(df)
     return df_scaled
@@ -32,9 +37,20 @@ def index():
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.json
-    input_data = preprocess_input(data)
+    print("Datos recibidos:", data)  # Para depuración
+
+    input_data = preprocess_input({
+        'area': data.get('area'),
+        'rooms': data.get('rooms'),
+        'bathrooms': data.get('bathrooms'),
+        'district': data.get('district'),
+        'province': data.get('province'),
+        'department': data.get('department')
+    })
+
     prediction = model.predict(input_data)
     predicted_price = prediction[0]
+
     return jsonify({'price': predicted_price})
 
 if __name__ == '__main__':
